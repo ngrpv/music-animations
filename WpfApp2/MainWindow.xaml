@@ -1,0 +1,25 @@
+﻿<Window x:Class="WpfApp2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="10*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="30*" />
+        </Grid.ColumnDefinitions>
+        <Button x:Name="PlayBtn" MinWidth="100" MinHeight="50" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="2">Play</Button>
+        <Button x:Name="PauseBtn" MinWidth="100" MinHeight="50" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">Pause</Button>
+        <Image Name="ImageViewer1" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+        <Button Name="btnOpenFile" Grid.Row="1" Grid.Column="1"  Click="btnOpenFile_Click" HorizontalAlignment="Stretch" Height="Auto">Open file</Button>
+
+    </Grid>
+</Window>
