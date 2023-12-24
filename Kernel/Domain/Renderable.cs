@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Drawing;
+using ILGPU;
 using ILGPU.Runtime;
 using Kernel.Domain.Interfaces;
 using Kernel.Domain.Utils;
@@ -65,7 +66,7 @@ namespace Kernel.Domain
             return context;
         }
 
-        public virtual DirectBitmap GetBitmap()
+        public virtual DirectBitmap GetBitmap(DirectBitmap bitmap = null, Func<Color, Color, Color> action = null, int i = 0)
         {
             CheckGpu();
             using var buffer = Gpu!.Allocate1D<Int32>(Width * Height);
@@ -87,6 +88,11 @@ namespace Kernel.Domain
             if (!IsGpuRenderable)
                 throw new ApplicationException($"{GetType().Name} cannot be used on GPU"
                                                + "\n For use CPU you need override GetBimap method");
+        }
+
+        public DirectBitmap GetBitmap()
+        {
+            throw new NotImplementedException();
         }
     }
 }

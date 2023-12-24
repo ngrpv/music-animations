@@ -12,69 +12,148 @@ namespace WpfApp2;
 
 public class VideoGenerator
 {
-    private readonly string audioPath;
-    private readonly IWavAudioProvider audioProvider;
     private readonly int width;
     private readonly int height;
 
-    private string TempFilesPath;
+    private readonly string tempFilesPath;
+    private readonly List<double[]> fft;
+    private ImageBase imageBase;
+    private DirectBitmap bmp;
 
-    public VideoGenerator(IWavAudioProvider audioProvider, int width, int height, string audioPath,
+    public int FramesCount => fft.Count;
+
+    private VideoGenerator(IWavAudioProvider audioProvider, int width, int height, string audioPath,
         string tempFilesPath)
     {
-        TempFilesPath = tempFilesPath;
-        if (!Directory.Exists(TempFilesPath))
-            Directory.CreateDirectory(TempFilesPath);
+        this.tempFilesPath = tempFilesPath;
+        if (!Directory.Exists(this.tempFilesPath))
+            Directory.CreateDirectory(this.tempFilesPath);
 
-        this.audioProvider = audioProvider;
         this.width = width;
         this.height = height;
-        this.audioPath = audioPath;
+
+        fft = new FftGenerator(audioProvider).GetFft(audioPath);
+        bmp = new DirectBitmap(width, height);
+        ClearTempDirectory();
+    }
+
+    public static VideoGenerator Funny(IWavAudioProvider audioProvider, int width, int height, string audioPath,
+        string tempFilesPath)
+    {
+        return new VideoGenerator(audioProvider, width, height, audioPath, tempFilesPath)
+            .WithFunny();
+    }
+
+    public static VideoGenerator Planets(IWavAudioProvider audioProvider, int width, int height, string audioPath,
+        string tempFilesPath)
+    {
+        return new VideoGenerator(audioProvider, width, height, audioPath, tempFilesPath)
+            .WithPlanets();
+    }
+
+    public static VideoGenerator ThreeD(IWavAudioProvider audioProvider, int width, int height, string audioPath,
+        string tempFilesPath)
+    {
+        return new VideoGenerator(audioProvider, width, height, audioPath, tempFilesPath)
+            .WithThreeD();
+    }
+
+    public static VideoGenerator PlanetsAndNoise(IWavAudioProvider audioProvider, int width, int height,
+        string audioPath,
+        string tempFilesPath)
+    {
+        return new VideoGenerator(audioProvider, width, height, audioPath, tempFilesPath)
+            .WithPlanetsAndNoise();
+    }
+    public static VideoGenerator FunnyAndNoise(IWavAudioProvider audioProvider, int width, int height,
+        string audioPath,
+        string tempFilesPath)
+    {
+        return new VideoGenerator(audioProvider, width, height, audioPath, tempFilesPath)
+            .WithFunnyAndNoise();
+    }
+
+    private VideoGenerator WithPlanets()
+    {
+        imageBase = PlanetsConfig();
+        return this;
+    }
+
+    private VideoGenerator WithFunny()
+    {
+        imageBase = FunnyConfig();
+        return this;
+    }
+
+    private VideoGenerator WithFunnyAndNoise()
+    {
+        imageBase =  ImageBase.Create()
+            .Config(new ImageSettings(width, height))
+            .Add<Funny>(f => f.Config(new FunnySettings(fft, Color.Chartreuse)))
+            .Add<Noise>(f => f.Config(new NoiseSettings(1, 20, new Random())));
+        return this;
     }
 
 
-    public IEnumerable<int> Planets()
+    private VideoGenerator WithThreeD()
     {
-        var f = new Planets(width, height)
-            .Config(new PlanetsSettings(20, 10, 100, Brushes.Chartreuse, new Random()));
-        for (var i = 0; i < 10000000; i++)
-        {
-            var bmp = f.GetBitmap().Bitmap;
-            bmp.Save($@"{TempFilesPath}\{i}.bmp");
-            bmp.Dispose();
-            yield return 1;
-        }
+        imageBase = ThreeDConfig();
+        return this;
     }
 
-    public IEnumerable<int> Funny()
+    private VideoGenerator WithPlanetsAndNoise()
     {
-        var fft = new FFTGenerator(audioProvider).GetFFT(audioPath);
-        var f = new Funny(width, height).Config(new FunnySettings(fft));
-        for (int i = 0; i < fft.Count; i++)
-        {
-            var bmp = f.GetBitmap().Bitmap;
-            bmp.Save($@"{TempFilesPath}\{i}.bmp");
-            bmp.Dispose();
-            yield return 1;
-        }
+        imageBase = PlanetsAndNoiseConfig();
+        return this;
     }
 
-    public IEnumerable<int> FunnyAnd()
+    public string GetFrame(int i)
     {
-        var fft = new FFTGenerator(audioProvider).GetFFT(audioPath);
-        var added =
-            ImageBase.Create()
-                .Config(new ImageSettings(width, height))
-                // .Add<Funny>(f => f.Config(new FunnySettings(fft)))
-                .Add<ThreeD>(f => f.Config(new ThreeDSettings(fft)));
-                // .Add<Mandelbrot>(f => f.Config(new MandelbrotSettings(2d, 0, 0, width, height)))
-                // .Add<Constant>(c => c.Config(new ConstantSettings(Color.Brown)));
-        for (int i = 0; i < fft.Count; i++)
-        {
-            var bmp = added.GetBitmap();
-            bmp.Bitmap.Save($@"{TempFilesPath}\{i}.bmp");
-            bmp.Dispose();
-            yield return 1;
-        }
+        var fileName = $@"{tempFilesPath}\{i}.bmp";
+
+        if (File.Exists(fileName))
+            return fileName;
+
+        bmp = imageBase.GetBitmap(bmp, i);
+        bmp.Bitmap.Save(fileName);
+        bmp.Reset();
+
+        return fileName;
+    }
+
+    private void ClearTempDirectory()
+    {
+        if (!Directory.Exists(tempFilesPath)) return;
+        Directory.Delete(tempFilesPath, true);
+        Directory.CreateDirectory(tempFilesPath);
+    }
+
+    private ImageBase FunnyConfig()
+    {
+        return ImageBase.Create()
+            .Config(new ImageSettings(width, height))
+            .Add<Funny>(f => f.Config(new FunnySettings(fft, Color.Green)));
+    }
+
+    private ImageBase ThreeDConfig()
+    {
+        return ImageBase.Create()
+            .Config(new ImageSettings(width, height))
+            .Add<ThreeD>(f => f.Config(new ThreeDSettings(fft)));
+    }
+
+    private ImageBase PlanetsConfig()
+    {
+        return ImageBase.Create()
+            .Config(new ImageSettings(width, height))
+            .Add<Planets>(f => f.Config(new PlanetsSettings(20, 10, 100, Brushes.Chartreuse, new Random())));
+    }
+
+    private ImageBase PlanetsAndNoiseConfig()
+    {
+        return ImageBase.Create()
+            .Config(new ImageSettings(width, height))
+            .Add<Planets>(f => f.Config(new PlanetsSettings(20, 10, 100, Brushes.Chartreuse, new Random())))
+            .Add<Noise>(f => f.Config(new NoiseSettings(1, 233, new Random())));
     }
 }

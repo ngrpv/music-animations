@@ -1,4 +1,4 @@
-using Kernel.Domain;
+using System.Drawing;
 using Kernel.Domain.Interfaces;
 using Kernel.Domain.Settings;
 using Kernel.Domain.Utils;
@@ -7,11 +7,11 @@ namespace Kernel.Services;
 
 public class ImageBase : Configurer<ImageSettings>
 {
-    private readonly List<(IRenderable renderable, Action<DirectBitmap, DirectBitmap> action, Delegate getter)> items;
+    private readonly List<(IRenderable renderable, Func<Color, Color, Color> action)> items;
 
     private ImageBase()
     {
-        items = new List<(IRenderable, Action<DirectBitmap, DirectBitmap>, Delegate)>();
+        items = new List<(IRenderable, Func<Color, Color, Color>)>();
     }
 
     public static ConfigurationContext<ImageBase, ImageBase, ImageSettings> Create()
@@ -34,15 +34,14 @@ public class ImageBase : Configurer<ImageSettings>
         var renderable1 = renderable.DynamicInvoke(obj) as IRenderable;
         items.Add(
             (renderable1,
-                (x, y) => x.Add(y),
-                renderable)
+                (x, y) => x.Add(y))
         );
 
         return this;
     }
 
 
-    public ImageBase Multiply<TRenderable>(Func<TRenderable, TRenderable> renderable)
+    public ImageBase Multiply<TRenderable>(Func<TRenderable, TRenderable> renderableFactory)
         where TRenderable : IRenderable
     {
         var obj = typeof(TRenderable)
@@ -50,21 +49,28 @@ public class ImageBase : Configurer<ImageSettings>
             {
                 Settings.Width, (object)Settings.Height
             });
-        var renderable1 = renderable.DynamicInvoke(obj) as IRenderable;
+        var renderable = renderableFactory.DynamicInvoke(obj) as IRenderable;
         items.Add(
-            (renderable1,
-                (x, y) => x.Multiply(y),
-                renderable)
+            (renderable,
+                (x, y) => x.Multiply(y))
         );
         return this;
     }
 
-    public DirectBitmap GetBitmap()
+    public DirectBitmap GetBitmap(DirectBitmap baseBitmap)
     {
-        var baseBitmap = new DirectBitmap(Settings.Width, Settings.Height);
-        foreach (var (renderable, action, getter) in items)
+        foreach (var (renderable, action) in items)
         {
-            action(baseBitmap, renderable.GetBitmap());
+            baseBitmap = renderable.GetBitmap(baseBitmap, action);
+        }
+
+        return baseBitmap;
+    }
+    public DirectBitmap GetBitmap(DirectBitmap baseBitmap, int i)
+    {
+        foreach (var (renderable, action) in items)
+        {
+            baseBitmap = renderable.GetBitmap(baseBitmap, action, i);
         }
 
         return baseBitmap;

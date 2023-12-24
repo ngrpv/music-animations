@@ -7,9 +7,8 @@ namespace Kernel.Domain
 {
     public class Gradient : Renderable<Gradient, GradientSettings>
     {
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bmp, Func<Color, Color, Color> action, int i =0)
         {
-            var bmp = new DirectBitmap(Width, Height);
             for (var x = 0; x < Width; x++)
             for (var y = 0; y < Height; y++)
             {
@@ -17,8 +16,10 @@ namespace Kernel.Domain
                 var dy = y / 256d;
                 var complex = new Complex(dx, dy);
                 var t = (2 * complex.Phase / Math.PI).ToInt();
-
-                bmp.SetPixel(x, y, Color.FromArgb(t, t, t));
+                var newColor = Color.FromArgb(t, t, t);
+                var oldColor = bmp.GetPixel(x, y);
+                
+                bmp.SetPixel(x, y, action(newColor, oldColor));
             }
 
             return bmp;

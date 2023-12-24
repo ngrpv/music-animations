@@ -3,19 +3,19 @@ using Spectrogram;
 
 namespace Kernel.Services;
 
-public class FFTGenerator
+public class FftGenerator
 {
     private readonly IWavAudioProvider provider;
-    
-    public FFTGenerator(IWavAudioProvider provider)
+
+    public FftGenerator(IWavAudioProvider provider)
     {
         this.provider = provider;
     }
     
-    public List<double[]> GetFFT(string filename)
+    public List<double[]> GetFft(string filename)
     {
         var (audio, sampleRate) = provider.ReadWav(filename);
-        var sg = new SpectrogramGenerator(sampleRate, fftSize: 4096, stepSize: 3900, maxFreq: 3000);
+        var sg = new SpectrogramGenerator(sampleRate, fftSize: 4096, stepSize: 200, maxFreq: 2000);
         sg.Add(audio);
         var fft = sg.GetFFTs();
 

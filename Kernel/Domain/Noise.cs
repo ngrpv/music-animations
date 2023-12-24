@@ -4,11 +4,10 @@ using Kernel.Domain.Utils;
 
 namespace Kernel.Domain;
 
-public class RandomG : Renderable<RandomG, RandomSettings>
+public class Noise : Renderable<Noise, NoiseSettings>
 {
-    public override DirectBitmap GetBitmap()
+    public override DirectBitmap GetBitmap(DirectBitmap bitmap, Func<Color, Color, Color> action, int i = 0)
     {
-        var bmp = new DirectBitmap(Width, Height);
         var r = Settings.Random;
         for (var x = 0; x < Width; x++)
         {
@@ -17,14 +16,16 @@ public class RandomG : Renderable<RandomG, RandomSettings>
                 var R = r.Next(Settings.Start, Settings.End);
                 var G = r.Next(Settings.Start, Settings.End);
                 var B = r.Next(Settings.Start, Settings.End);
-                bmp.SetPixel(x, y, Color.FromArgb(R, G, B));
+                var newColor = Color.FromArgb(R, G, B);
+                var oldColor = bitmap.GetPixel(x, y);
+                bitmap.SetPixel(x, y, action(oldColor, newColor));
             }
-        }  
+        }
 
-        return bmp;
+        return bitmap;
     }
 
-    public RandomG(int width, int height) : base(width, height)
+    public Noise(int width, int height) : base(width, height)
     {
     }
 }

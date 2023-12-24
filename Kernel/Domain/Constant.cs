@@ -6,15 +6,19 @@ namespace Kernel.Domain
 {
     public class Constant : Renderable<Constant, ConstantSettings>
     {
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bitmap, Func<Color, Color, Color> action, int _ = 0)
         {
-            var bmp = new DirectBitmap(Width, Height);
-            for (int i = 0; i < bmp.Data.Length; i++)
+            for (var i = 0; i < bitmap.Width; i++)
             {
-                bmp.Data[i] = ((Color)Settings.Color).ToArgb();
+                for (var j = 0; j < bitmap.Height; j++)
+                {
+                    var newColor = Settings.Color;
+                    var oldColor = bitmap.GetPixel(i, j);
+                    bitmap.SetPixel(i, j, action(newColor, oldColor));
+                }
             }
 
-            return bmp;
+            return bitmap;
         }
 
         public Constant(int width, int height) : base(width, height)
