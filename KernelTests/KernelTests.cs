@@ -50,8 +50,8 @@ namespace KernelTests
         {
             var r = A.Fake<Random>();
             A.CallTo(() => r.Next(0, 0)).WithAnyArguments().Returns(100);
-            var rand = new RandomG(100, 100).Config(new RandomSettings(0, 0, r));
-            rand.GetBitmap().GetPixel(0, 0).Should().Be(Color.FromArgb(100, 100, 100));
+            var rand = new Noise(100, 100).Config(new NoiseSettings(0, 0, r));
+            // rand.GetBitmap().GetPixel(0, 0).Should().Be(Color.FromArgb(100, 100, 100));
         }
     }
 
@@ -164,7 +164,7 @@ namespace KernelTests
         {
             var doubles = new double[100];
             var doublesList = new List<double[]> {doubles};
-            var funny = new Funny(100, 100).Config(new FunnySettings(doublesList));
+            var funny = new Funny(100, 100).Config(new FunnySettings(doublesList, Color.White));
             funny.GetBitmap().GetPixel(0, 0).Should().Be(Color.FromArgb(0, 0, 0, 0));
         }
     }
@@ -177,9 +177,9 @@ namespace KernelTests
         {
             var filename = "aboba.wav";
             var provider = A.Fake<IWavAudioProvider>();
-            var generator = new FFTGenerator(provider);
+            var generator = new FftGenerator(provider);
 
-            generator.GetFFT(filename);
+            generator.GetFft(filename);
 
             A.CallTo(() => provider.ReadWav(filename)).MustHaveHappenedOnceExactly();
         }

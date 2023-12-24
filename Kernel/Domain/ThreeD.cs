@@ -15,7 +15,6 @@ namespace Kernel.Domain
     }
     public class ThreeD : Renderable<ThreeD, ThreeDSettings>
     {
-        private int i = 0;
         private Vector3 sphere;
         private bool isGenerated = false;
         (double, double)[] minMaxes;
@@ -26,7 +25,7 @@ namespace Kernel.Domain
             bmp = new DirectBitmap(width, height);
         }
 
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bitmap, Func<Color, Color, Color> action, int i = 0)
         {
             var n = 3;
             var discrete = Settings.FFT[0].Length / n;
@@ -47,7 +46,7 @@ namespace Kernel.Domain
                 louds[j] = (FindMaxAndFreq(Settings.FFT[i], discrete * j, discrete * (j + 1)).Item2 - minMaxes[j].Item1) / minMaxes[j].Item2;
             }
 
-            var r = Math.Min(Width, Height);
+            var r = Math.Max(Width, Height);
             sphere = new Vector3((float)louds[2] * r, (float)louds[0] * r, (float)louds[1] * r); // 2white 3 9gray
             var sphereList = new List<Vector3>();
             for (double phi = -Math.PI / 2; phi <= Math.PI / 2; phi += 0.12)
@@ -65,11 +64,10 @@ namespace Kernel.Domain
             var g = Graphics.FromImage(bmp.Bitmap);
             foreach (var point in sphereList)
             {
-                var viewer = 2000;
+                var viewer = 4000;
                 var distance = viewer + point.Z; //r dependend. r == 500 => [500, 1500], so squared [250000, 2250000]. minPoint we should have.
-                var minDistance = (viewer - r) * (viewer - r);
-                var minPoint = 1;
-                var size = minPoint * distance * distance / minDistance;
+                var viewArea = (viewer - r) * (viewer - r);
+                var size = distance * distance / viewArea;
                 g.FillEllipse(Brushes.White, point.X - size / 2, point.Y - size / 2, size, size);
             }
 

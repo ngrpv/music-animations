@@ -19,7 +19,7 @@
         <Button x:Name="PlayBtn" MinWidth="100" MinHeight="50" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="2">Play</Button>
         <Button x:Name="PauseBtn" MinWidth="100" MinHeight="50" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">Pause</Button>
         <Image Name="ImageViewer1" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+        <Image Name="ImageViewer2" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
         <Button Name="btnOpenFile" Grid.Row="1" Grid.Column="1"  Click="btnOpenFile_Click" HorizontalAlignment="Stretch" Height="Auto">Open file</Button>
-
     </Grid>
 </Window>

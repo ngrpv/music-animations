@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,8 +20,11 @@ namespace WpfApp2
         private static bool isStarted;
         private static bool videoInitialized;
         private CancellationTokenSource cts = new();
-        private const string TempFiles = @"C:\Users\Garipov\RiderProjects\ProjectNice\WpfApp2\bin\Debug\net6.0-windows\temp_img";
 
+        private const string TempFiles =
+            @"C:\Users\Garipov\RiderProjects\ProjectNice\WpfApp2\bin\Debug\net6.0-windows\temp_img";
+
+        private readonly object lockObj = new object();
 
         public MainWindow()
         {
@@ -43,27 +48,24 @@ namespace WpfApp2
 
         private void StartImageUpdater(string audioPath, CancellationToken ct)
         {
-            var generator = new VideoGenerator(new WavAudioMonoProvider(16000), 600, 400, audioPath, TempFiles);
-            var i = 0;
-            foreach (var _ in generator.FunnyAnd())
+            var generator = VideoGenerator.FunnyAndNoise(new WavAudioMonoProvider(16000), 600, 400, audioPath, TempFiles);
+            var count = generator.FramesCount;
+            while (true)
             {
                 videoInitialized = true;
-                var temp = i;
-                i++;
-                if (ct.IsCancellationRequested)
-                    break;
-                while (!isStarted)
-                {
-                    Thread.Sleep(500);
-                }
+                SpinWait.SpinUntil(() => isStarted);
 
+                var position = Dispatcher.Invoke(() => mediaPlayer.Position / mediaPlayer.NaturalDuration.TimeSpan);
+                var i = (int)(position * count);
+                if (i >= count || ct.IsCancellationRequested)
+                    break;
+
+                var frame = generator.GetFrame(i);
                 Dispatcher.Invoke(() =>
                 {
-                    var img = new BitmapImage(new Uri(
-                        $@"{TempFiles}\{temp}.bmp"));
+                    var img = new BitmapImage(new Uri(frame));
                     return ImageViewer1.Source = img;
                 });
-               // Thread.Sleep(6);
             }
         }
 

@@ -17,7 +17,7 @@ public class ImageBaseTests
             .Add<Constant>(c => c.Config(new ConstantSettings(Color.Aqua)))
             .Add<Constant>(c => c.Config(new ConstantSettings(Color.Orange)));
 
-        var bitmap = imageBase.GetBitmap().Bitmap;
+        var bitmap = imageBase.GetBitmap(new DirectBitmap(1, 1)).Bitmap;
 
         bitmap.Size.Should().Be(new Size(1, 1));
         bitmap.GetPixel(0, 0).Should().Be(Color.White.Add(Color.Aqua).Add(Color.Orange));
@@ -31,7 +31,7 @@ public class ImageBaseTests
             .Multiply<Constant>(c => c.Config(new ConstantSettings(Color.Aqua)))
             .Multiply<Constant>(c => c.Config(new ConstantSettings(Color.Orange)));
 
-        var bitmap = imageBase.GetBitmap().Bitmap;
+        var bitmap = imageBase.GetBitmap(new DirectBitmap(1,1)).Bitmap;
 
         bitmap.Size.Should().Be(new Size(1, 1));
         bitmap.GetPixel(0, 0).Should().Be(Color.White.Multiply(Color.Aqua).Multiply(Color.Orange));
@@ -45,7 +45,7 @@ public class ImageBaseTests
             .Add<Constant>(c => c.Config(new ConstantSettings(Color.Aqua)))
             .Multiply<Constant>(c => c.Config(new ConstantSettings(Color.Orange)));
 
-        var bitmap = imageBase.GetBitmap().Bitmap;
+        var bitmap = imageBase.GetBitmap(new DirectBitmap(1,1)).Bitmap;
 
         bitmap.Size.Should().Be(new Size(1, 1));
         bitmap.GetPixel(0, 0).Should().Be(Color.White.Add(Color.Aqua).Multiply(Color.Orange));
@@ -59,7 +59,7 @@ public class ImageBaseTests
             .Multiply<Constant>(c => c.Config(new ConstantSettings(Color.Aqua)))
             .Add<Constant>(c => c.Config(new ConstantSettings(Color.Orange)));
 
-        var bitmap = imageBase.GetBitmap().Bitmap;
+        var bitmap = imageBase.GetBitmap(new DirectBitmap(1,1)).Bitmap;
 
         bitmap.Size.Should().Be(new Size(1, 1));
         bitmap.GetPixel(0, 0).Should().Be(Color.Brown.Multiply(Color.Aqua).Add(Color.Orange));

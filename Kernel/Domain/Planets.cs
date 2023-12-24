@@ -38,9 +38,8 @@ namespace Kernel.Domain
         {
         }
 
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bmp, Func<Color, Color, Color> action, int i = 0)
         {
-            var bmp = new DirectBitmap(Width, Height);
             if (PlanetsList.Count == 0)
             {
                 var r = Settings.Random;

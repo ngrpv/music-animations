@@ -8,14 +8,13 @@ namespace Kernel.Domain
     public class Funny : Renderable<Funny, FunnySettings>
     {
         bool isGenerated = false;
-        int i = 0;
         (double, double)[] minMaxes;
 
         public Funny(int width, int height) : base(width, height)
         {
         }
 
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bitmap, Func<Color, Color, Color> action, int i = 0)
         {
             var n = Settings.Fft[0].Length;
             var discrete = Settings.Fft[0].Length / n;
@@ -57,21 +56,19 @@ namespace Kernel.Domain
                 fullVectors[j] = new Vector2(Width / 2, Height / 2) + r * new Vector2((float)Math.Cos(angles[j]), (float)Math.Sin(angles[j]));
             }
 
-            var bmp = new DirectBitmap(Width, Height);
-            var g = Graphics.FromImage(bmp.Bitmap);
+            var g = Graphics.FromImage(bitmap.Bitmap);
             g.FillClosedCurve(Brushes.Gray, vectors.Select(x => new PointF(x.X, x.Y)).ToArray());
             foreach (var v in fullVectors)
             {
-                g.DrawLine(new Pen(Color.White, 0.5f), v.X, v.Y, Width / 2, Height / 2);
+                g.DrawLine(new Pen(Settings.Color, 0.5f), v.X, v.Y, Width / 2, Height / 2);
             }
 
             foreach (var v in vectors)
             {
-                g.DrawLine(new Pen(Color.White, 6), v.X, v.Y, Width / 2, Height / 2);
+                g.DrawLine(new Pen(Settings.Color, 6), v.X, v.Y, Width / 2, Height / 2);
             }
 
-            i++;
-            return bmp;
+            return bitmap;
         }
 
         private (int, double) FindMaxAndFreq(double[] fft, int down, int up)

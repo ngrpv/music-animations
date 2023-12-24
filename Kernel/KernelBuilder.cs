@@ -39,7 +39,7 @@ public class KernelBuilder
             .InSingletonScope()
             .WithConstructorArgument("multiplier", multiplier);
 
-        Kernel.Bind<FFTGenerator>().ToSelf();
+        Kernel.Bind<FftGenerator>().ToSelf();
 
         return this;
     }

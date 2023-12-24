@@ -1,8 +1,8 @@
 namespace Kernel.Domain.Settings;
 
-public readonly struct RandomSettings
+public readonly struct NoiseSettings
 {
-    public RandomSettings(int start, int end, Random random)
+    public NoiseSettings(int start, int end, Random random)
     {
         Start = start;
         End = end;

@@ -7,7 +7,7 @@ namespace Kernel.Domain
 {
     public class Gradient : Renderable<Gradient, GradientSettings>
     {
-        public override DirectBitmap GetBitmap()
+        public override DirectBitmap GetBitmap(DirectBitmap bitmap, Func<Color, Color, Color> action, int i =0)
         {
             var bmp = new DirectBitmap(Width, Height);
             for (var x = 0; x < Width; x++)
